@@ -9,7 +9,7 @@ contracts/cache
 contracts/broadcast
 .env
 .env.local
-deployments/*.local.json
+deployments/local.json
 apps/web/public/artifacts/*.zkey
 apps/web/public/artifacts/*.wasm
 scripts/artifacts.json
