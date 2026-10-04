@@ -2,11 +2,17 @@
   "name": "@humanbehind/scripts",
   "private": true,
   "type": "module",
-  "scripts": { "typecheck": "tsc -p tsconfig.json --noEmit" },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
   "dependencies": {
     "@humanbehind/core": "workspace:*",
     "@humanbehind/verifier": "workspace:*",
     "viem": "^2.57.0"
   },
-  "devDependencies": { "@types/node": "^22.10.0", "typescript": "~5.9.3" }
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "~5.9.3",
+    "playwright-core": "^1.59.0"
+  }
 }

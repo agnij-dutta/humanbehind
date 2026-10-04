@@ -10,6 +10,5 @@ contracts/broadcast
 .env
 .env.local
 deployments/local.json
-apps/web/public/artifacts/*.zkey
-apps/web/public/artifacts/*.wasm
+apps/web/public/artifacts/*
 scripts/artifacts.json

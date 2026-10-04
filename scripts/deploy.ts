@@ -59,6 +59,8 @@ export function writeDeployment(d: Deployment) {
     '# Server-only. Enables the TEST QR minting endpoint and the anvil dev wallet.',
     'HB_DEV_MODE=true',
     'NEXT_PUBLIC_DEV_MODE=true',
+    '# Circuit artifacts served locally (run: pnpm --filter web link-artifacts).',
+    'NEXT_PUBLIC_ARTIFACTS_BASE=/artifacts',
     '',
   ].join('\n');
   writeFileSync(path.join(ROOT, 'apps/web/.env.local'), env);

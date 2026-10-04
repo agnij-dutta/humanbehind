@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "humanbehind/anon-aadhaar-binding-v1",
+  "title": "ERC-8004 registration file extension: humanBacking",
+  "description": "Optional array on an ERC-8004 registration-v1 file. Each entry points to an on-chain HumanBindingRegistry that can answer isHumanBacked(agentId). Discovery hint only: verifiers must query a registry they trust, never accept the card's word.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["type", "bindingRegistry", "agentId", "claims", "trustAnchor", "check"],
+    "additionalProperties": false,
+    "properties": {
+      "type": { "const": "humanbehind/anon-aadhaar-binding-v1" },
+      "bindingRegistry": {
+        "type": "string",
+        "description": "CAIP-10 account id of the HumanBindingRegistry: eip155:<chainId>:<address>",
+        "pattern": "^eip155:[0-9]+:0x[0-9a-fA-F]{40}$"
+      },
+      "agentId": {
+        "description": "The ERC-8004 agentId in the identity registry named in `registrations`.",
+        "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "string", "pattern": "^[0-9]+$" }]
+      },
+      "claims": {
+        "type": "array",
+        "items": { "enum": ["unique-human", "age-over-18"] },
+        "uniqueItems": true
+      },
+      "trustAnchor": {
+        "enum": ["uidai-offline-kyc", "anon-aadhaar-test"],
+        "description": "Self-reported. The registry's isTestAnchor() is authoritative."
+      },
+      "check": { "const": "isHumanBacked(uint256)" }
+    }
+  }
+}
