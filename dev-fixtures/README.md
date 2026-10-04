@@ -5,8 +5,8 @@ without anyone ever touching real Aadhaar data.
 
 | File | What it is |
 |---|---|
-| `uidai-sample-v1-qr.txt` | UIDAI's own published sample Secure QR (a fictitious resident), as shipped in the anon-aadhaar repo. |
-| `testPrivateKey.pem` | anon-aadhaar's **public** test RSA key (`circuits/assets/testPrivateKey.pem` in github.com/anon-aadhaar/anon-aadhaar). Everyone has it. |
+| `uidai-sample-v1-qr.txt` | UIDAI's own published sample Secure QR (the fictitious resident "Sumit Kumar", DOB 01-01-1984), the same payload used in anon-aadhaar's `packages/circuits/scripts/generateTestData.ts`. |
+| `testPrivateKey.pem` | anon-aadhaar's **public** test RSA key (byte-identical to `packages/circuits/assets/testPrivateKey.pem` in github.com/anon-aadhaar/anon-aadhaar). Everyone has it. |
 | `testCertificate.pem` | The matching test certificate. Its key hash is `15134874015316324267425466444584014077184337590635665158241104437045239495873`. |
 
 Because the test private key is public, a proof made with it proves nothing
@@ -19,3 +19,6 @@ about a real person. That is why:
   `allowTestAnchor: true`.
 - The web app only serves the test-QR endpoint when the **server** env
   `HB_DEV_MODE=true`, and the UI labels every test artifact as TEST.
+
+`gitleaks` flags `testPrivateKey.pem` as a private key. It is allowlisted in
+`.gitleaks.toml` for the reason above; nothing else in the history is.

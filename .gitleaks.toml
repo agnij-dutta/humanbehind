@@ -1,0 +1,7 @@
+# gitleaks config: default rules plus one reviewed allowlist entry.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public anon-aadhaar TEST key, byte-identical to anon-aadhaar/anon-aadhaar packages/circuits/assets/testPrivateKey.pem. Not a secret; proofs under it are rejected by the verifier library unless allowTestAnchor is set."
+paths = ['''dev-fixtures/testPrivateKey\.pem''']
