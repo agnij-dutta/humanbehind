@@ -64,6 +64,11 @@ owner, nonce)`, so it was made for this agent and this owner.
   config. The card is a hint; a card can point at a contract that always
   returns `true`. `@humanbehind/verifier`'s `verifyCardClaim` ignores entries
   whose registry is not in `trustedRegistries`.
+- **Pin the agent.** Check the agentId and identity registry YOU resolved (the
+  token whose `tokenURI` served the card), not the `agentId` written in the
+  entry. Otherwise a card can point at somebody else's genuinely human-backed
+  agent and borrow its badge. `verifyCardClaim` requires `agentId` and
+  `identityRegistry` and skips entries that name a different agent.
 - **Reject test anchors in production.** `isHumanBacked()` from
   `@humanbehind/verifier` returns `false` for a test-anchored registry unless
   `allowTestAnchor: true` is passed.

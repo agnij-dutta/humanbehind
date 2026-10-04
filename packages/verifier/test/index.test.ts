@@ -157,12 +157,78 @@ const card = (agentId: number, registry: Address = REGISTRY, chainId = CHAIN_ID)
 
 test('verifyCardClaim: accepts a true claim against a trusted registry', async () => {
   const client = fakeClient({ [`${REGISTRY.toLowerCase()}:1`]: live() });
-  assert.equal(await verifyCardClaim(card(1), { client, trustedRegistries: [REGISTRY] }), true);
+  assert.equal(
+    await verifyCardClaim(card(1), { client, agentId: 1n, identityRegistry: IDENTITY, trustedRegistries: [REGISTRY] }),
+    true,
+  );
 });
 
 test('verifyCardClaim: rejects registries that are not trusted or on another chain', async () => {
   const evil: Address = '0x000000000000000000000000000000000000e111';
   const client = fakeClient({ [`${evil}:1`]: live(), [`${REGISTRY.toLowerCase()}:1`]: live() });
-  assert.equal(await verifyCardClaim(card(1, evil), { client, trustedRegistries: [REGISTRY] }), false);
-  assert.equal(await verifyCardClaim(card(1, REGISTRY, 1), { client, trustedRegistries: [REGISTRY] }), false);
+  assert.equal(
+    await verifyCardClaim(card(1, evil), {
+      client,
+      agentId: 1n,
+      identityRegistry: IDENTITY,
+      trustedRegistries: [REGISTRY],
+    }),
+    false,
+  );
+  assert.equal(
+    await verifyCardClaim(card(1, REGISTRY, 1), {
+      client,
+      agentId: 1n,
+      identityRegistry: IDENTITY,
+      trustedRegistries: [REGISTRY],
+    }),
+    false,
+  );
+});
+
+test("verifyCardClaim: a card cannot borrow another agent's binding", async () => {
+  // Agent 1 is genuinely human-backed. Agent 7's card claims agentId 1 on the
+  // trusted registry. Asking about agent 7 must not return true.
+  const client = fakeClient({ [`${REGISTRY.toLowerCase()}:1`]: live() });
+  assert.equal(
+    await verifyCardClaim(card(1), { client, agentId: 7n, identityRegistry: IDENTITY, trustedRegistries: [REGISTRY] }),
+    false,
+  );
+});
+
+test('verifyCardClaim: rejects a registry serving a different identity registry', async () => {
+  const client = fakeClient({ [`${REGISTRY.toLowerCase()}:1`]: live() });
+  const otherIdentity: Address = '0x0000000000000000000000000000000000002d00';
+  assert.equal(
+    await verifyCardClaim(card(1), {
+      client,
+      agentId: 1n,
+      identityRegistry: otherIdentity,
+      trustedRegistries: [REGISTRY],
+    }),
+    false,
+  );
+});
+
+test('verifyCardClaim: a malformed entry does not hide a later valid one', async () => {
+  const client = fakeClient({ [`${REGISTRY.toLowerCase()}:1`]: live() });
+  const good = card(1).humanBacking[0];
+  const withJunk = { humanBacking: [{ ...good, bindingRegistry: 'eip155:x:nope' }, { ...good, agentId: 'abc' }, good] };
+  assert.equal(
+    await verifyCardClaim(withJunk, { client, agentId: 1n, identityRegistry: IDENTITY, trustedRegistries: [REGISTRY] }),
+    true,
+  );
+});
+
+test('isHumanBacked: identityRegistry mismatch fails closed', async () => {
+  const client = fakeClient({ [`${REGISTRY.toLowerCase()}:1`]: live() });
+  assert.equal(await isHumanBacked(1n, { client, registry: REGISTRY, identityRegistry: IDENTITY }), true);
+  assert.equal(
+    await isHumanBacked(1n, {
+      client,
+      registry: REGISTRY,
+      identityRegistry: '0x0000000000000000000000000000000000002d00',
+    }),
+    false,
+  );
 });

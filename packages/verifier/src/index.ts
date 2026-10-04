@@ -97,6 +97,12 @@ export type IsHumanBackedOptions = {
   client: PublicClient;
   /** The binding registry you trust. Pin it in config; never take it from a card. */
   registry: Address;
+  /**
+   * The ERC-8004 identity registry the agentId belongs to. An agentId is only
+   * unique within one identity registry, so pass this whenever you know it:
+   * the check fails if the binding registry serves a different one.
+   */
+  identityRegistry?: Address;
   /** Accept bindings made with the public test key. Only for dev/test. Default false. */
   allowTestAnchor?: boolean;
   /** Require the agent be 18+ backed. Default true. */
@@ -124,6 +130,9 @@ export type Verdict = { ok: boolean; reasons: string[] };
 export function evaluate(b: HumanBacking, opts: Omit<IsHumanBackedOptions, 'client' | 'registry'>): Verdict {
   const reasons: string[] = [];
   if (!b.humanBacked) reasons.push('no live binding (never bound, revoked, or agent changed hands)');
+  if (opts.identityRegistry && opts.identityRegistry.toLowerCase() !== b.identityRegistry.toLowerCase()) {
+    reasons.push(`binding registry serves identity registry ${b.identityRegistry}, not ${opts.identityRegistry}`);
+  }
   if (b.testAnchor && !opts.allowTestAnchor)
     reasons.push('registry trusts the public TEST key; not a real-human proof');
   if ((opts.requireAdult ?? true) && !b.ageAbove18) reasons.push('not proven 18+');
@@ -174,24 +183,45 @@ export function humanBackingFromCard(card: unknown): HumanBackingEntry[] {
   );
 }
 
+export type VerifyCardClaimOptions = {
+  client: PublicClient;
+  /** Binding registries you trust, pinned in your config. */
+  trustedRegistries: Address[];
+  /**
+   * The agent you are evaluating, resolved by you (for example the token whose
+   * `tokenURI` served this card). Required: without it, a card could point at a
+   * trusted registry entry for somebody else's human-backed agent and borrow
+   * its badge.
+   */
+  agentId: bigint | number;
+  /** The ERC-8004 identity registry that `agentId` lives in. Required for the same reason. */
+  identityRegistry: Address;
+} & Omit<IsHumanBackedOptions, 'client' | 'registry' | 'identityRegistry'>;
+
 /**
- * Check a card's claim against chain, but only against registries you trust.
- * Returns false if the card points anywhere else.
+ * Check a card's claim against chain, but only for the agent you asked about
+ * and only against registries you trust. Entries that point anywhere else, or
+ * name a different agentId, are ignored. Any error => false (fail closed).
  */
-export async function verifyCardClaim(
-  card: unknown,
-  opts: { client: PublicClient; trustedRegistries: Address[] } & Omit<IsHumanBackedOptions, 'client' | 'registry'>,
-): Promise<boolean> {
+export async function verifyCardClaim(card: unknown, opts: VerifyCardClaimOptions): Promise<boolean> {
+  let chainId: number;
+  let expectedAgentId: bigint;
   try {
-    const chainId = await opts.client.getChainId();
-    const trusted = new Set(opts.trustedRegistries.map((a) => a.toLowerCase()));
-    for (const e of humanBackingFromCard(card)) {
-      const { chainId: c, address } = parseCaip10(e.bindingRegistry);
-      if (c !== chainId || !trusted.has(address.toLowerCase())) continue;
-      if (await isHumanBacked(BigInt(e.agentId), { ...opts, registry: address })) return true;
-    }
-    return false;
+    chainId = await opts.client.getChainId();
+    expectedAgentId = BigInt(opts.agentId);
   } catch {
     return false;
   }
+  const trusted = new Set(opts.trustedRegistries.map((a) => a.toLowerCase()));
+  for (const e of humanBackingFromCard(card)) {
+    try {
+      const { chainId: c, address } = parseCaip10(e.bindingRegistry);
+      if (c !== chainId || !trusted.has(address.toLowerCase())) continue;
+      if (BigInt(e.agentId) !== expectedAgentId) continue;
+      if (await isHumanBacked(expectedAgentId, { ...opts, registry: address })) return true;
+    } catch {
+      // A malformed entry is skipped, not trusted; later entries still get a chance.
+    }
+  }
+  return false;
 }

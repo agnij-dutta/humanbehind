@@ -117,6 +117,19 @@ export const humanBindingRegistryAbi = [
   },
   {
     "type": "function",
+    "name": "VERIFY_GAS_LIMIT",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "admin",
     "inputs": [],
     "outputs": [

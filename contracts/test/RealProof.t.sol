@@ -2,7 +2,7 @@
 pragma solidity ^0.8.20;
 
 import {Test, stdJson} from "forge-std/Test.sol";
-import {HumanBindingRegistry, IAnonAadhaar, IERC8004Identity} from "../src/HumanBindingRegistry.sol";
+import {HumanBindingRegistry} from "../src/HumanBindingRegistry.sol";
 import {AgentIdentityRegistry} from "../src/AgentIdentityRegistry.sol";
 import {AnonAadhaar} from "../src/vendor/AnonAadhaar.sol";
 import {Verifier} from "../src/vendor/AnonAadhaarGroth16Verifier.sol";

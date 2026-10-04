@@ -218,6 +218,8 @@ contract HumanBindingRegistry {
             nullifier: nullifier,
             boundOwner: msg.sender,
             boundAt: uint64(block.timestamp),
+            // _checkFresh bounds timestamp to block.timestamp + 1 hour, far below 2^64.
+            // forge-lint: disable-next-line(unsafe-typecast)
             qrTimestamp: uint64(timestamp),
             ageAbove18: true, // enforced by the hardcoded reveal vector
             active: true

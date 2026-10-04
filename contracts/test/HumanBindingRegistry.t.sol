@@ -371,4 +371,109 @@ contract HumanBindingRegistryTest is Test {
         vm.expectRevert(HumanBindingRegistry.InvalidProof.selector);
         reg.bind(id, nullifier, ts, p);
     }
+
+    // --- review additions: replay after revoke, cap edge cases, anchor selection ---
+
+    function test_humanRevokeProofNotReplayableAfterRebind() public {
+        uint256 id = _register(alice);
+        _bind(alice, id, ALICE_NULL, 1);
+        uint256[8] memory rp = _proof(500);
+        verifier.accept(SEED, ALICE_NULL, ts, reg.revokeSignal(id), _adultOnly(), rp);
+        reg.revokeByHuman(id, ALICE_NULL, ts, rp);
+
+        // The human binds again; the old revoke proof (public in calldata) must not undo it.
+        _bind(alice, id, ALICE_NULL, 2);
+        vm.prank(mallory);
+        vm.expectRevert(HumanBindingRegistry.InvalidProof.selector);
+        reg.revokeByHuman(id, ALICE_NULL, ts, rp);
+        assertTrue(reg.isHumanBacked(id));
+    }
+
+    function test_oldBindProofDeadAfterHumanRevoke() public {
+        uint256 id = _register(alice);
+        uint256[8] memory bp = _mintBindProof(id, alice, ALICE_NULL, 1);
+        vm.prank(alice);
+        reg.bind(id, ALICE_NULL, ts, bp);
+        uint256[8] memory rp = _proof(500);
+        verifier.accept(SEED, ALICE_NULL, ts, reg.revokeSignal(id), _adultOnly(), rp);
+        reg.revokeByHuman(id, ALICE_NULL, ts, rp);
+
+        // A wallet thief holding the original bind calldata cannot restore the badge.
+        vm.prank(alice);
+        vm.expectRevert(HumanBindingRegistry.InvalidProof.selector);
+        reg.bind(id, ALICE_NULL, ts, bp);
+    }
+
+    function test_pendingProofCannotBeFrontRun() public {
+        uint256 id = _register(alice);
+        uint256[8] memory p = _mintBindProof(id, alice, ALICE_NULL, 1);
+        vm.prank(mallory);
+        vm.expectRevert(HumanBindingRegistry.NotAgentOwner.selector);
+        reg.bind(id, ALICE_NULL, ts, p);
+    }
+
+    function test_staleBindingHoldsSlotUntilPruned() public {
+        reg.setMaxAgentsPerHuman(1);
+        uint256 a1 = _register(alice);
+        _bind(alice, a1, ALICE_NULL, 1);
+        vm.prank(alice);
+        ids.transferFrom(alice, bob, a1);
+        assertFalse(reg.isHumanBacked(a1));
+
+        uint256 a2 = _register(alice);
+        uint256[8] memory p = _mintBindProof(a2, alice, ALICE_NULL, 2);
+        vm.prank(alice);
+        vm.expectRevert(HumanBindingRegistry.HumanAgentLimit.selector);
+        reg.bind(a2, ALICE_NULL, ts, p);
+
+        reg.pruneStale(a1);
+        vm.prank(alice);
+        reg.bind(a2, ALICE_NULL, ts, p);
+        assertEq(reg.agentsOf(ALICE_NULL), 1);
+    }
+
+    function test_loweringCapKeepsExistingBlocksNew() public {
+        uint256 a1 = _register(alice);
+        uint256 a2 = _register(alice);
+        _bind(alice, a1, ALICE_NULL, 1);
+        _bind(alice, a2, ALICE_NULL, 2);
+        reg.setMaxAgentsPerHuman(1);
+        assertTrue(reg.isHumanBacked(a1));
+        assertTrue(reg.isHumanBacked(a2));
+
+        uint256 a3 = _register(alice);
+        uint256[8] memory p = _mintBindProof(a3, alice, ALICE_NULL, 3);
+        vm.prank(alice);
+        vm.expectRevert(HumanBindingRegistry.HumanAgentLimit.selector);
+        reg.bind(a3, ALICE_NULL, ts, p);
+    }
+
+    function test_nullifierSeedIsNotCallerChosen() public {
+        // Same human, proof made with a seed of the attacker's choosing: the
+        // registry passes its own immutable seed, so the proof cannot verify.
+        uint256 id = _register(alice);
+        uint256[8] memory p = _proof(7);
+        verifier.accept(SEED ^ 1, 999, ts, reg.bindSignal(id, alice), _adultOnly(), p);
+        vm.prank(alice);
+        vm.expectRevert(HumanBindingRegistry.InvalidProof.selector);
+        reg.bind(id, 999, ts, p);
+        assertEq(reg.nullifierSeed(), SEED);
+    }
+
+    /// The trust anchor is whatever the verifier contract holds. The deployer's
+    /// flag can only make deployment fail; it can never relabel an anchor.
+    function testFuzz_anchorReadFromVerifierNotFlag(bool useTestKey, bool declaredTest) public {
+        uint256 anchor = useTestKey ? reg.TEST_PUBKEY_HASH() : reg.PRODUCTION_PUBKEY_HASH();
+        MockAnonAadhaar v = new MockAnonAadhaar(anchor);
+        if (useTestKey != declaredTest) {
+            vm.expectRevert(abi.encodeWithSelector(HumanBindingRegistry.AnchorMismatch.selector, anchor));
+        }
+        HumanBindingRegistry r = new HumanBindingRegistry(
+            IAnonAadhaar(address(v)), IERC8004Identity(address(ids)), SEED, declaredTest, 3, 1 days
+        );
+        if (useTestKey == declaredTest) {
+            assertEq(r.isTestAnchor(), useTestKey);
+            assertEq(r.trustAnchorPubkeyHash(), anchor);
+        }
+    }
 }

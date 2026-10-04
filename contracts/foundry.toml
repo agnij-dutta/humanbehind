@@ -14,3 +14,17 @@ runs = 256
 [fmt]
 # Vendored from @anon-aadhaar/contracts@2.4.3; kept byte-identical to upstream.
 ignore = ["src/vendor/*.sol", "src/vendor/interfaces/*.sol"]
+
+[lint]
+ignore = ["src/vendor/*.sol", "src/vendor/interfaces/*.sol"]
+# Naming lints are off on purpose: public immutables and ERC-721 `name`/`symbol`
+# are ABI surface, and renaming them to SCREAMING_SNAKE_CASE would change the
+# getters every client calls. `unsafe-cheatcode` flags vm.readFile, which the
+# real-proof test needs (scoped by fs_permissions above).
+exclude_lints = [
+  "screaming-snake-case-immutable",
+  "screaming-snake-case-const",
+  "mixed-case-variable",
+  "unsafe-cheatcode",
+  "unwrapped-modifier-logic",
+]

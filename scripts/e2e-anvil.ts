@@ -138,12 +138,30 @@ async function main() {
     ],
   };
   check(
-    await verifyCardClaim(card, { client: pub, trustedRegistries: [d.bindingRegistry], allowTestAnchor: true }),
+    await verifyCardClaim(card, {
+      client: pub,
+      agentId,
+      identityRegistry: d.identityRegistry,
+      trustedRegistries: [d.bindingRegistry],
+      allowTestAnchor: true,
+    }),
     'card claim verifies against trusted registry',
   );
   check(
     !(await verifyCardClaim(card, {
       client: pub,
+      agentId: agentId + 1000n,
+      identityRegistry: d.identityRegistry,
+      trustedRegistries: [d.bindingRegistry],
+      allowTestAnchor: true,
+    })),
+    'card cannot lend its binding to a different agentId',
+  );
+  check(
+    !(await verifyCardClaim(card, {
+      client: pub,
+      agentId,
+      identityRegistry: d.identityRegistry,
       trustedRegistries: ['0x000000000000000000000000000000000000dEaD' as Address],
       allowTestAnchor: true,
     })),
