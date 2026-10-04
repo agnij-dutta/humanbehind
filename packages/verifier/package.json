@@ -2,7 +2,27 @@
   "name": "@humanbehind/verifier",
   "version": "0.1.0",
   "description": "isHumanBacked(agentId): check that an ERC-8004 agent is bound to a unique, adult human via HumanBindingRegistry.",
-  "private": true,
+  "keywords": [
+    "erc-8004",
+    "sybil-resistance",
+    "ai-agents",
+    "anon-aadhaar",
+    "viem"
+  ],
+  "license": "MIT",
+  "author": "Agnij Dutta (https://x.com/0xholmesdev)",
+  "homepage": "https://github.com/agnij-dutta/humanbehind/tree/main/packages/verifier#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agnij-dutta/humanbehind.git",
+    "directory": "packages/verifier"
+  },
+  "bugs": {
+    "url": "https://github.com/agnij-dutta/humanbehind/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -12,10 +32,16 @@
       "default": "./dist/index.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p test/tsconfig.json",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "prepublishOnly": "tsc -p tsconfig.json"
   },
   "peerDependencies": {
     "viem": "^2.0.0"

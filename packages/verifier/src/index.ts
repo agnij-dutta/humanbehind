@@ -60,6 +60,11 @@ export type HumanBacking = {
   maxAgentsForHuman: bigint;
 };
 
+/**
+ * Raw on-chain attestation for `agentId` from the binding registry you trust.
+ * No policy is applied; pass the result to `evaluate` for a verdict. Throws on
+ * RPC errors (use `isHumanBacked` for a fail-closed boolean).
+ */
 export async function getHumanBacking(
   agentId: bigint,
   opts: { client: PublicClient; registry: Address },
@@ -163,6 +168,7 @@ export type HumanBackingEntry = {
   check: 'isHumanBacked(uint256)';
 };
 
+/** Parse a CAIP-10 account id (`eip155:<chainId>:<address>`). Throws on anything else. */
 export function parseCaip10(s: string): { namespace: string; chainId: number; address: Address } {
   const m = /^([a-z0-9-]+):(\d+):(0x[0-9a-fA-F]{40})$/.exec(s);
   if (!m) throw new Error(`not a CAIP-10 account id: ${s}`);

@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  ci:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: stable
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint and format
+        run: |
+          pnpm lint
+          pnpm format:check
+          cd contracts && forge lint
+
+      - name: Contracts (unit tests with mock verifier + real-proof tests with the real groth16 verifier)
+        run: cd contracts && forge build && forge test -vv
+
+      - name: Build packages
+        run: pnpm build:packages
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Package tests
+        run: pnpm test:packages
+
+      - name: ABI is in sync with the contracts
+        run: node scripts/export-abi.mjs && git diff --exit-code packages/core/src/abi.ts
+
+      - name: Web build
+        run: pnpm --filter web build

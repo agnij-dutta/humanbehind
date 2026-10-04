@@ -1,14 +1,28 @@
+# dependencies and build output
 node_modules
-.artifacts
+dist
 .next
 .next-*
-dist
 *.tsbuildinfo
 contracts/out
 contracts/cache
 contracts/broadcast
-.env
-.env.local
-deployments/local.json
+
+# circuit artifacts (612 MB zkey) and generated files
+.artifacts
 apps/web/public/artifacts/*
 scripts/artifacts.json
+deployments/local.json
+
+# env files and keys (dev-fixtures/*.pem are the PUBLIC anon-aadhaar test key, tracked on purpose)
+.env
+.env.*
+!.env.example
+*.key
+keystore/
+.secrets/
+
+# local data, logs, OS cruft
+*.log
+coverage
+.DS_Store

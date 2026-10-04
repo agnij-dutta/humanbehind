@@ -1,6 +1,31 @@
 {
   "name": "humanbehind",
+  "version": "0.1.0",
   "private": true,
+  "description": "Proof of Human Behind the Agent: a unique, adult Indian resident proves with anon-aadhaar that they own an ERC-8004 AI agent, revealing zero personal data.",
+  "keywords": [
+    "erc-8004",
+    "anon-aadhaar",
+    "zero-knowledge",
+    "sybil-resistance",
+    "ai-agents",
+    "groth16",
+    "proof-of-personhood"
+  ],
+  "license": "MIT",
+  "author": "Agnij Dutta (https://x.com/0xholmesdev)",
+  "homepage": "https://github.com/agnij-dutta/humanbehind#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agnij-dutta/humanbehind.git"
+  },
+  "bugs": {
+    "url": "https://github.com/agnij-dutta/humanbehind/issues"
+  },
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=9"
+  },
   "packageManager": "pnpm@9.15.0",
   "scripts": {
     "build:packages": "pnpm --filter @humanbehind/core --filter @humanbehind/verifier build",
@@ -15,7 +40,8 @@
     "test": "pnpm test:packages && pnpm test:contracts",
     "lint": "eslint . --max-warnings 0",
     "format": "prettier --write . && cd contracts && forge fmt",
-    "format:check": "prettier --check . && cd contracts && forge fmt --check"
+    "format:check": "prettier --check . && cd contracts && forge fmt --check",
+    "artifacts": "node scripts/fetch-artifacts.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9",

@@ -63,6 +63,7 @@ export function computeBindSignal(args: {
   );
 }
 
+/** Mirrors HumanBindingRegistry.revokeSignal (no owner: revocation is relayable). */
 export function computeRevokeSignal(args: {
   chainId: bigint | number;
   registry: Address;
@@ -109,6 +110,7 @@ export type BindingProofJson = {
   [K in keyof BindingProof]: K extends 'packed' ? string[] : K extends 'provingMs' ? number : string;
 };
 
+/** BigInts to decimal strings, for postMessage / fetch transport. */
 export function proofToJson(p: BindingProof): BindingProofJson {
   return {
     nullifier: p.nullifier.toString(),
@@ -122,6 +124,7 @@ export function proofToJson(p: BindingProof): BindingProofJson {
   };
 }
 
+/** Inverse of `proofToJson`. Throws if the packed proof is not 8 elements. */
 export function proofFromJson(j: BindingProofJson): BindingProof {
   const packed = j.packed.map((x) => BigInt(x));
   if (packed.length !== 8) throw new Error('packed proof must have 8 elements');

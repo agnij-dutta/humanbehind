@@ -28,8 +28,14 @@ export type ProveOptions = {
   onStage?: (s: ProverStage) => void;
 };
 
+/** The proof would not satisfy the registry's disclosure policy (not 18+, or reveals extra fields). */
 export class PolicyError extends Error {}
 
+/**
+ * Generate an anon-aadhaar groth16 proof that commits to `signal` and reveals
+ * only ageAbove18. Throws `PolicyError` instead of returning a proof the
+ * registry would reject. Proving takes tens of seconds to minutes.
+ */
 export async function proveBinding(o: ProveOptions): Promise<BindingProof> {
   o.onStage?.('parsing-qr');
   const args = await generateArgs({

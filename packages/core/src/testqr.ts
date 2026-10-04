@@ -21,6 +21,7 @@ export type TestQrOptions = {
   dob?: string;
 };
 
+/** Returns the Secure QR payload (decimal string) for a TEST identity signed with the public test key. */
 export function mintTestQr(o: TestQrOptions): string {
   const decoded = decompressByteArray(convertBigIntToByteArray(BigInt(o.sampleQr.trim())));
   const toSign = createCustomV2TestData({

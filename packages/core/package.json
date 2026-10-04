@@ -1,7 +1,28 @@
 {
   "name": "@humanbehind/core",
   "version": "0.1.0",
-  "private": true,
+  "description": "ABIs, signal encoding, groth16 proof packing and an anon-aadhaar prover for HumanBindingRegistry.",
+  "keywords": [
+    "erc-8004",
+    "anon-aadhaar",
+    "zero-knowledge",
+    "groth16",
+    "snarkjs"
+  ],
+  "license": "MIT",
+  "author": "Agnij Dutta (https://x.com/0xholmesdev)",
+  "homepage": "https://github.com/agnij-dutta/humanbehind/tree/main/packages/core#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/agnij-dutta/humanbehind.git",
+    "directory": "packages/core"
+  },
+  "bugs": {
+    "url": "https://github.com/agnij-dutta/humanbehind/issues"
+  },
+  "engines": {
+    "node": ">=22"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,10 +40,16 @@
       "default": "./dist/testqr.js"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "sideEffects": false,
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p test/tsconfig.json",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "prepublishOnly": "tsc -p tsconfig.json"
   },
   "dependencies": {
     "@anon-aadhaar/core": "2.4.3",
