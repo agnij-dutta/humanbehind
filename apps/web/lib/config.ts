@@ -33,4 +33,5 @@ export const config = {
     process.env.NEXT_PUBLIC_ARTIFACTS_BASE ?? 'https://anon-aadhaar-artifacts.s3.eu-central-1.amazonaws.com/v2.0.0',
 };
 
-export const isConfigured = () => /^0x[0-9a-fA-F]{40}$/.test(config.bindingRegistry) && /^0x[0-9a-fA-F]{40}$/.test(config.identityRegistry);
+export const isConfigured = () =>
+  /^0x[0-9a-fA-F]{40}$/.test(config.bindingRegistry) && /^0x[0-9a-fA-F]{40}$/.test(config.identityRegistry);

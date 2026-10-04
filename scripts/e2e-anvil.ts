@@ -50,7 +50,12 @@ async function main() {
     return r;
   };
   const register = async (w: typeof alice, uri: string) => {
-    const { result } = await pub.simulateContract({ ...ids, functionName: 'register', args: [uri], account: w.account });
+    const { result } = await pub.simulateContract({
+      ...ids,
+      functionName: 'register',
+      args: [uri],
+      account: w.account,
+    });
     await send(w, { ...ids, functionName: 'register', args: [uri] } as never);
     return result;
   };
@@ -63,31 +68,55 @@ async function main() {
   const signal = await pub.readContract({ ...reg, functionName: 'bindSignal', args: [agentId, alice.account.address] });
   const nonce = await pub.readContract({ ...reg, functionName: 'nonceOf', args: [agentId] });
   const offchain = computeBindSignal({
-    chainId: d.chainId, registry: d.bindingRegistry, identityRegistry: d.identityRegistry, agentId, owner: alice.account.address, nonce,
+    chainId: d.chainId,
+    registry: d.bindingRegistry,
+    identityRegistry: d.identityRegistry,
+    agentId,
+    owner: alice.account.address,
+    nonce,
   });
   check(signal === offchain, 'on-chain bindSignal == computeBindSignal');
   const seed = await pub.readContract({ ...reg, functionName: 'nullifierSeed' });
 
   step('mint TEST QR + prove (real groth16, multi-thread node)');
-  const qrData = mintTestQr({ sampleQr: devFixture('uidai-sample-v1-qr.txt'), testPrivateKeyPem: devFixture('testPrivateKey.pem') });
+  const qrData = mintTestQr({
+    sampleQr: devFixture('uidai-sample-v1-qr.txt'),
+    testPrivateKeyPem: devFixture('testPrivateKey.pem'),
+  });
   const proof = await proveBinding({
-    qrData, certificatePem: devFixture('testCertificate.pem'), nullifierSeed: seed, signal, wasm: WASM, zkey: ZKEY,
+    qrData,
+    certificatePem: devFixture('testCertificate.pem'),
+    nullifierSeed: seed,
+    signal,
+    wasm: WASM,
+    zkey: ZKEY,
     singleThread: false,
   });
   console.log(`  proving time: ${proof.provingMs} ms`);
 
   step('bind');
   const g = await pub.estimateContractGas({
-    ...reg, functionName: 'bind', args: [agentId, proof.nullifier, proof.timestamp, proof.packed], account: alice.account,
+    ...reg,
+    functionName: 'bind',
+    args: [agentId, proof.nullifier, proof.timestamp, proof.packed],
+    account: alice.account,
   });
   console.log(`  estimated gas: ${g}`);
-  await send(alice, { ...reg, functionName: 'bind', args: [agentId, proof.nullifier, proof.timestamp, proof.packed] } as never);
+  await send(alice, {
+    ...reg,
+    functionName: 'bind',
+    args: [agentId, proof.nullifier, proof.timestamp, proof.packed],
+  } as never);
 
   step('verifier lib');
-  check((await isHumanBacked(agentId, { client: pub, registry: d.bindingRegistry })) === false,
-    'isHumanBacked() is FALSE by default for a test-anchor registry (fail closed)');
-  check((await isHumanBacked(agentId, { client: pub, registry: d.bindingRegistry, allowTestAnchor: true })) === true,
-    'isHumanBacked(allowTestAnchor) is true');
+  check(
+    (await isHumanBacked(agentId, { client: pub, registry: d.bindingRegistry })) === false,
+    'isHumanBacked() is FALSE by default for a test-anchor registry (fail closed)',
+  );
+  check(
+    (await isHumanBacked(agentId, { client: pub, registry: d.bindingRegistry, allowTestAnchor: true })) === true,
+    'isHumanBacked(allowTestAnchor) is true',
+  );
   const b = await getHumanBacking(agentId, { client: pub, registry: d.bindingRegistry });
   check(b.nullifier === proof.nullifier && b.ageAbove18, 'attestation records nullifier + 18+');
   console.log(`  verdict without test allowance: ${evaluate(b, {}).reasons.join('; ')}`);
@@ -97,44 +126,78 @@ async function main() {
     name: 'demo-agent',
     registrations: [{ agentId: Number(agentId), agentRegistry: `eip155:${d.chainId}:${d.identityRegistry}` }],
     supportedTrust: ['human-backed'],
-    humanBacking: [{
-      type: 'humanbehind/anon-aadhaar-binding-v1', bindingRegistry: `eip155:${d.chainId}:${d.bindingRegistry}`,
-      agentId: Number(agentId), claims: ['unique-human', 'age-over-18'], trustAnchor: 'anon-aadhaar-test', check: 'isHumanBacked(uint256)',
-    }],
+    humanBacking: [
+      {
+        type: 'humanbehind/anon-aadhaar-binding-v1',
+        bindingRegistry: `eip155:${d.chainId}:${d.bindingRegistry}`,
+        agentId: Number(agentId),
+        claims: ['unique-human', 'age-over-18'],
+        trustAnchor: 'anon-aadhaar-test',
+        check: 'isHumanBacked(uint256)',
+      },
+    ],
   };
-  check(await verifyCardClaim(card, { client: pub, trustedRegistries: [d.bindingRegistry], allowTestAnchor: true }), 'card claim verifies against trusted registry');
-  check(!(await verifyCardClaim(card, { client: pub, trustedRegistries: ['0x000000000000000000000000000000000000dEaD' as Address], allowTestAnchor: true })),
-    'card claim pointing at an untrusted registry is ignored');
+  check(
+    await verifyCardClaim(card, { client: pub, trustedRegistries: [d.bindingRegistry], allowTestAnchor: true }),
+    'card claim verifies against trusted registry',
+  );
+  check(
+    !(await verifyCardClaim(card, {
+      client: pub,
+      trustedRegistries: ['0x000000000000000000000000000000000000dEaD' as Address],
+      allowTestAnchor: true,
+    })),
+    'card claim pointing at an untrusted registry is ignored',
+  );
 
   step('Sybil cap = 2: same human, second agent ok, third rejected');
   const agent2 = await register(alice, 'data:,agent2');
   const agent3 = await register(bob, 'data:,agent3'); // different wallet, same human
   const p2 = await proveBinding({
-    qrData, certificatePem: devFixture('testCertificate.pem'), nullifierSeed: seed,
+    qrData,
+    certificatePem: devFixture('testCertificate.pem'),
+    nullifierSeed: seed,
     signal: await pub.readContract({ ...reg, functionName: 'bindSignal', args: [agent2, alice.account.address] }),
-    wasm: WASM, zkey: ZKEY, singleThread: false,
+    wasm: WASM,
+    zkey: ZKEY,
+    singleThread: false,
   });
   console.log(`  proving time: ${p2.provingMs} ms`);
   await send(alice, { ...reg, functionName: 'bind', args: [agent2, p2.nullifier, p2.timestamp, p2.packed] } as never);
   check(p2.nullifier === proof.nullifier, 'same human => same nullifier across agents');
   const p3 = await proveBinding({
-    qrData, certificatePem: devFixture('testCertificate.pem'), nullifierSeed: seed,
+    qrData,
+    certificatePem: devFixture('testCertificate.pem'),
+    nullifierSeed: seed,
     signal: await pub.readContract({ ...reg, functionName: 'bindSignal', args: [agent3, bob.account.address] }),
-    wasm: WASM, zkey: ZKEY, singleThread: false,
+    wasm: WASM,
+    zkey: ZKEY,
+    singleThread: false,
   });
   console.log(`  proving time: ${p3.provingMs} ms`);
   let rejected = false;
   try {
-    await pub.simulateContract({ ...reg, functionName: 'bind', args: [agent3, p3.nullifier, p3.timestamp, p3.packed], account: bob.account });
+    await pub.simulateContract({
+      ...reg,
+      functionName: 'bind',
+      args: [agent3, p3.nullifier, p3.timestamp, p3.packed],
+      account: bob.account,
+    });
   } catch (e) {
     rejected = String(e).includes('HumanAgentLimit');
   }
   check(rejected, 'third agent (even from another wallet) rejected with HumanAgentLimit');
 
   step('transfer kills the badge');
-  await send(alice, { ...ids, functionName: 'transferFrom', args: [alice.account.address, bob.account.address, agentId] } as never);
-  check((await isHumanBacked(agentId, { client: pub, registry: d.bindingRegistry, allowTestAnchor: true })) === false,
-    'after transfer, agent is no longer human-backed');
+  await send(alice, {
+    ...ids,
+    functionName: 'transferFrom',
+    args: [alice.account.address, bob.account.address, agentId],
+  } as never);
+  check(
+    (await isHumanBacked(agentId, { client: pub, registry: d.bindingRegistry, allowTestAnchor: true })) === false,
+    'after transfer, agent is no longer human-backed',
+  );
 
   console.log('\nE2E PASSED');
   anvil.kill();

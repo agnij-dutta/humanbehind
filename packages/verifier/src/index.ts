@@ -66,7 +66,12 @@ export async function getHumanBacking(
 ): Promise<HumanBacking> {
   const { client, registry } = opts;
   const [a, identityRegistry, chainId] = await Promise.all([
-    client.readContract({ address: registry, abi: humanBindingRegistryReadAbi, functionName: 'attestation', args: [agentId] }),
+    client.readContract({
+      address: registry,
+      abi: humanBindingRegistryReadAbi,
+      functionName: 'attestation',
+      args: [agentId],
+    }),
     client.readContract({ address: registry, abi: humanBindingRegistryReadAbi, functionName: 'identityRegistry' }),
     client.getChainId(),
   ]);
@@ -119,7 +124,8 @@ export type Verdict = { ok: boolean; reasons: string[] };
 export function evaluate(b: HumanBacking, opts: Omit<IsHumanBackedOptions, 'client' | 'registry'>): Verdict {
   const reasons: string[] = [];
   if (!b.humanBacked) reasons.push('no live binding (never bound, revoked, or agent changed hands)');
-  if (b.testAnchor && !opts.allowTestAnchor) reasons.push('registry trusts the public TEST key; not a real-human proof');
+  if (b.testAnchor && !opts.allowTestAnchor)
+    reasons.push('registry trusts the public TEST key; not a real-human proof');
   if ((opts.requireAdult ?? true) && !b.ageAbove18) reasons.push('not proven 18+');
   if (opts.maxAgentsPerHuman !== undefined && b.agentsForHuman > BigInt(opts.maxAgentsPerHuman)) {
     reasons.push(`human backs ${b.agentsForHuman} agents, policy allows ${opts.maxAgentsPerHuman}`);
@@ -161,7 +167,9 @@ export function humanBackingFromCard(card: unknown): HumanBackingEntry[] {
   if (!Array.isArray(raw)) return [];
   return raw.filter(
     (e): e is HumanBackingEntry =>
-      !!e && typeof e === 'object' && (e as HumanBackingEntry).type === HUMAN_BACKING_TYPE &&
+      !!e &&
+      typeof e === 'object' &&
+      (e as HumanBackingEntry).type === HUMAN_BACKING_TYPE &&
       typeof (e as HumanBackingEntry).bindingRegistry === 'string',
   );
 }

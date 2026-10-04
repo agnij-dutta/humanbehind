@@ -97,10 +97,24 @@ export async function proveBinding(o: ProveOptions): Promise<BindingProof> {
 }
 
 /** Off-chain groth16 check against a vkey. Useful before paying gas. */
-export async function verifyBindingProofOffchain(vkey: object, p: BindingProof, groth16: Groth16Proof): Promise<boolean> {
+export async function verifyBindingProofOffchain(
+  vkey: object,
+  p: BindingProof,
+  groth16: Groth16Proof,
+): Promise<boolean> {
   return snarkjs.groth16.verify(
     vkey as never,
-    [p.pubkeyHash, p.nullifier, p.timestamp, p.ageAbove18, 0n, 0n, 0n, p.nullifierSeed, anonAadhaarSignalHash(p.signal)].map(String),
+    [
+      p.pubkeyHash,
+      p.nullifier,
+      p.timestamp,
+      p.ageAbove18,
+      0n,
+      0n,
+      0n,
+      p.nullifierSeed,
+      anonAadhaarSignalHash(p.signal),
+    ].map(String),
     groth16 as never,
   );
 }

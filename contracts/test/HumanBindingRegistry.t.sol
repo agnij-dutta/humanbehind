@@ -34,7 +34,9 @@ contract HumanBindingRegistryTest is Test {
     // --- helpers ---
 
     function _proof(uint256 tag) internal pure returns (uint256[8] memory p) {
-        for (uint256 i; i < 8; i++) p[i] = tag + i;
+        for (uint256 i; i < 8; i++) {
+            p[i] = tag + i;
+        }
     }
 
     function _adultOnly() internal pure returns (uint256[4] memory r) {
@@ -353,9 +355,8 @@ contract HumanBindingRegistryTest is Test {
 
     function test_verifierRevertFailsClosed() public {
         RevertingAnonAadhaar bad = new RevertingAnonAadhaar(reg.TEST_PUBKEY_HASH());
-        HumanBindingRegistry r = new HumanBindingRegistry(
-            IAnonAadhaar(address(bad)), IERC8004Identity(address(ids)), SEED, true, 3, 1 days
-        );
+        HumanBindingRegistry r =
+            new HumanBindingRegistry(IAnonAadhaar(address(bad)), IERC8004Identity(address(ids)), SEED, true, 3, 1 days);
         uint256 id = _register(alice);
         vm.prank(alice);
         vm.expectRevert(HumanBindingRegistry.InvalidProof.selector);

@@ -2,8 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { decodeEventLog, type Address } from 'viem';
-import { agentIdentityRegistryAbi, humanBindingRegistryAbi, proofFromJson, type BindingProofJson } from '@humanbehind/core';
+import { decodeEventLog } from 'viem';
+import {
+  agentIdentityRegistryAbi,
+  humanBindingRegistryAbi,
+  proofFromJson,
+  type BindingProofJson,
+} from '@humanbehind/core';
 import { publicClient } from '@/lib/chain';
 import { config, isConfigured } from '@/lib/config';
 import { ANVIL_DEV_ACCOUNTS, connectAnvil, connectInjected, explain, type Wallet } from '@/lib/wallet';
@@ -22,7 +27,9 @@ const short = (a: string) => `${a.slice(0, 6)}…${a.slice(-4)}`;
 
 export default function BindFlow() {
   const [chainInfo, setChainInfo] = useState<Chain | null>(null);
-  const [chainErr, setChainErr] = useState<string | null>(null);
+  const [chainErr, setChainErr] = useState<string | null>(() =>
+    isConfigured() ? null : 'Registry addresses are not configured. Run scripts/deploy.ts (see README).',
+  );
   const [wallet, setWallet] = useState<Wallet | null>(null);
   const [agentId, setAgentId] = useState<bigint | null>(null);
   const [agentName, setAgentName] = useState('my-trading-agent');
@@ -37,10 +44,7 @@ export default function BindFlow() {
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
-    if (!isConfigured()) {
-      setChainErr('Registry addresses are not configured. Run scripts/deploy.ts (see README).');
-      return;
-    }
+    if (!isConfigured()) return;
     // The trust anchor comes from the contract, never from a client flag.
     Promise.all([
       publicClient.readContract({ ...reg, functionName: 'isTestAnchor' }),
@@ -89,7 +93,11 @@ export default function BindFlow() {
       }
       if (id === null) throw new Error('Registered event not found.');
       if (id !== predicted) {
-        await send({ ...ids, functionName: 'setAgentURI', args: [id, `${window.location.origin}/api/agent/${id}/card`] } as never);
+        await send({
+          ...ids,
+          functionName: 'setAgentURI',
+          args: [id, `${window.location.origin}/api/agent/${id}/card`],
+        } as never);
       }
       setAgentId(id);
     });
@@ -99,14 +107,16 @@ export default function BindFlow() {
       if (!/^\d+$/.test(existingId)) throw new Error('Agent id must be a number.');
       const id = BigInt(existingId);
       const owner = await publicClient.readContract({ ...ids, functionName: 'ownerOf', args: [id] });
-      if (owner.toLowerCase() !== wallet?.address.toLowerCase()) throw new Error(`Agent #${id} is owned by ${short(owner)}, not this wallet.`);
+      if (owner.toLowerCase() !== wallet?.address.toLowerCase())
+        throw new Error(`Agent #${id} is owned by ${short(owner)}, not this wallet.`);
       setAgentId(id);
     });
 
   const mintTestQr = (opts: { freshPhoto?: boolean; minor?: boolean }) =>
     run(async () => {
       const res = await fetch('/api/dev/test-qr', { method: 'POST', body: JSON.stringify(opts) });
-      if (!res.ok) throw new Error((await res.json().catch(() => ({}))).error ?? `test QR endpoint returned ${res.status}`);
+      if (!res.ok)
+        throw new Error((await res.json().catch(() => ({}))).error ?? `test QR endpoint returned ${res.status}`);
       setQr(await res.json());
       setProof(null);
     });
@@ -114,7 +124,11 @@ export default function BindFlow() {
   const prove = () =>
     run(async () => {
       if (!wallet || agentId === null || !qr || !chainInfo) return;
-      const signal = await publicClient.readContract({ ...reg, functionName: 'bindSignal', args: [agentId, wallet.address] });
+      const signal = await publicClient.readContract({
+        ...reg,
+        functionName: 'bindSignal',
+        args: [agentId, wallet.address],
+      });
       setStage('starting');
       setElapsed(0);
       const t0 = Date.now();
@@ -151,7 +165,11 @@ export default function BindFlow() {
     run(async () => {
       if (!proof || agentId === null) return;
       const p = proofFromJson(proof);
-      const receipt = await send({ ...reg, functionName: 'bind', args: [agentId, p.nullifier, p.timestamp, p.packed] } as never);
+      const receipt = await send({
+        ...reg,
+        functionName: 'bind',
+        args: [agentId, p.nullifier, p.timestamp, p.packed],
+      } as never);
       setBound(receipt.transactionHash);
     });
 
@@ -194,7 +212,12 @@ export default function BindFlow() {
               chainInfo &&
               config.chainId === 31337 &&
               ANVIL_DEV_ACCOUNTS.map((a, i) => (
-                <button key={a} className="ghost" disabled={busy} onClick={() => run(async () => setWallet(connectAnvil(a)))}>
+                <button
+                  key={a}
+                  className="ghost"
+                  disabled={busy}
+                  onClick={() => run(async () => setWallet(connectAnvil(a)))}
+                >
                   Anvil dev #{i + 1} ({short(a)})
                 </button>
               ))}
@@ -245,7 +268,11 @@ export default function BindFlow() {
               <button disabled={agentId === null || busy} onClick={() => mintTestQr({})}>
                 Mint TEST QR
               </button>
-              <button className="ghost" disabled={agentId === null || busy} onClick={() => mintTestQr({ freshPhoto: true })}>
+              <button
+                className="ghost"
+                disabled={agentId === null || busy}
+                onClick={() => mintTestQr({ freshPhoto: true })}
+              >
                 New test human
               </button>
               <button className="ghost" disabled={agentId === null || busy} onClick={() => mintTestQr({ minor: true })}>
@@ -253,8 +280,8 @@ export default function BindFlow() {
               </button>
             </div>
             <p className="note">
-              Test QRs are UIDAI&apos;s published sample resident (a fictitious person) re-signed with the public test key.
-              No real Aadhaar data is used or accepted here.
+              Test QRs are UIDAI&apos;s published sample resident (a fictitious person) re-signed with the public test
+              key. No real Aadhaar data is used or accepted here.
             </p>
             {qr && (
               <div className="okbox small">
@@ -276,8 +303,8 @@ export default function BindFlow() {
           <b>04</b>Prove in your browser
         </h2>
         <p className="small muted">
-          The proof commits to this agent, this wallet, this chain and this registry, and reveals only that the holder is
-          18+. The QR never leaves your browser.
+          The proof commits to this agent, this wallet, this chain and this registry, and reveals only that the holder
+          is 18+. The QR never leaves your browser.
         </p>
         <button disabled={!qr || !!stage || busy || !!bound} onClick={prove}>
           {stage ? `Proving… ${elapsed}s` : proof ? 'Prove again' : 'Generate proof'}

@@ -4,7 +4,12 @@ import { Instrument_Serif, Inter, JetBrains_Mono } from 'next/font/google';
 import { config } from '@/lib/config';
 import './globals.css';
 
-const serif = Instrument_Serif({ subsets: ['latin'], weight: '400', style: ['normal', 'italic'], variable: '--font-serif' });
+const serif = Instrument_Serif({
+  subsets: ['latin'],
+  weight: '400',
+  style: ['normal', 'italic'],
+  variable: '--font-serif',
+});
 const sans = Inter({ subsets: ['latin'], variable: '--font-sans' });
 const mono = JetBrains_Mono({ subsets: ['latin'], variable: '--font-mono' });
 
@@ -26,8 +31,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           </header>
           {children}
           <footer>
-            Binds an ERC-8004 agent to an anon-aadhaar proof: unique human, 18+, nothing else revealed.
-            Local and testnet only.
+            Binds an ERC-8004 agent to an anon-aadhaar proof: unique human, 18+, nothing else revealed. Local and
+            testnet only.
           </footer>
         </div>
       </body>

@@ -5,7 +5,7 @@ Status: proposal, implemented in this repo for local and testnet use.
 ## Motivation
 
 ERC-8004 gives an agent an on-chain identity (an ERC-721 in the Identity
-Registry) and a registration file. It says nothing about *who* is accountable
+Registry) and a registration file. It says nothing about _who_ is accountable
 for the agent. Marketplaces that want Sybil resistance today either do KYC
 (and hold personal data) or do nothing.
 
@@ -26,9 +26,7 @@ Add `"human-backed"` to `supportedTrust` and a `humanBacking` array:
   "services": [{ "name": "A2A", "endpoint": "https://agent.example/.well-known/agent-card.json", "version": "0.3.0" }],
   "x402Support": true,
   "active": true,
-  "registrations": [
-    { "agentId": 42, "agentRegistry": "eip155:43113:0xIdentityRegistry" }
-  ],
+  "registrations": [{ "agentId": 42, "agentRegistry": "eip155:43113:0xIdentityRegistry" }],
   "supportedTrust": ["reputation", "human-backed"],
   "humanBacking": [
     {
@@ -53,7 +51,7 @@ JSON Schema: [`humanBacking.schema.json`](./humanBacking.schema.json).
    registry's immutable trust anchor (UIDAI production key, or the public
    test key: check `isTestAnchor()`).
 2. The proof committed to `(chainid, registry, identityRegistry, agentId,
-   owner, nonce)`, so it was made for this agent and this owner.
+owner, nonce)`, so it was made for this agent and this owner.
 3. The proof revealed exactly `ageAbove18 = 1` and nothing else
    (gender, state, pincode hidden; enforced by the contract).
 4. The proof's nullifier (per-registry pseudonymous human id) backs at most
@@ -77,9 +75,9 @@ JSON Schema: [`humanBacking.schema.json`](./humanBacking.schema.json).
 import { isHumanBacked } from '@humanbehind/verifier';
 
 const ok = await isHumanBacked(42n, {
-  client,                                   // viem PublicClient
-  registry: '0xHumanBindingRegistry',       // pinned in your config
-  maxAgentsPerHuman: 1,                     // optional stricter policy
+  client, // viem PublicClient
+  registry: '0xHumanBindingRegistry', // pinned in your config
+  maxAgentsPerHuman: 1, // optional stricter policy
 });
 ```
 
@@ -89,6 +87,6 @@ The Validation Registry (`validationRequest` / `validationResponse` with a
 0 to 100 score and a tag) could carry this signal too: an off-chain validator
 watches `HumanBound` / `BindingRevoked` and posts `validationResponse(…, 100,
 …, tag = "human-backed")`. We chose a dedicated registry instead because the
-validation response would be a validator's *claim*, while `isHumanBacked` is
+validation response would be a validator's _claim_, while `isHumanBacked` is
 the proof verification itself, readable by any contract in one call. A
 validator bridge is listed as future work.

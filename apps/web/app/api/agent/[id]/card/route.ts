@@ -27,7 +27,8 @@ export async function GET(req: Request, { params }: { params: { id: string } }) 
   return NextResponse.json({
     type: 'https://eips.ethereum.org/EIPS/eip-8004#registration-v1',
     name: `humanbehind-demo-agent-${id}`,
-    description: 'Demo agent registered via Human Behind the Agent. Carries a zero-knowledge proof that a unique adult human controls it.',
+    description:
+      'Demo agent registered via Human Behind the Agent. Carries a zero-knowledge proof that a unique adult human controls it.',
     image: `${origin}/badge.svg`,
     services: [{ name: 'web', endpoint: `${origin}/agent/${id}` }],
     x402Support: false,

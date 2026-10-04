@@ -57,7 +57,15 @@ const unbound: Attestation = {
 function fakeClient(table: Record<string, Attestation>, chainId = CHAIN_ID): PublicClient {
   return {
     getChainId: async () => chainId,
-    readContract: async ({ address, functionName, args }: { address: Address; functionName: string; args?: [bigint] }) => {
+    readContract: async ({
+      address,
+      functionName,
+      args,
+    }: {
+      address: Address;
+      functionName: string;
+      args?: [bigint];
+    }) => {
       if (functionName === 'identityRegistry') return IDENTITY;
       const key = `${address.toLowerCase()}:${args![0]}`;
       return table[key] ?? unbound;
@@ -156,8 +164,5 @@ test('verifyCardClaim: rejects registries that are not trusted or on another cha
   const evil: Address = '0x000000000000000000000000000000000000e111';
   const client = fakeClient({ [`${evil}:1`]: live(), [`${REGISTRY.toLowerCase()}:1`]: live() });
   assert.equal(await verifyCardClaim(card(1, evil), { client, trustedRegistries: [REGISTRY] }), false);
-  assert.equal(
-    await verifyCardClaim(card(1, REGISTRY, 1), { client, trustedRegistries: [REGISTRY] }),
-    false,
-  );
+  assert.equal(await verifyCardClaim(card(1, REGISTRY, 1), { client, trustedRegistries: [REGISTRY] }), false);
 });

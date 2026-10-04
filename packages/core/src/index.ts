@@ -3,11 +3,9 @@ import { encodeAbiParameters, keccak256, toHex, type Address } from 'viem';
 export * from './abi.js';
 
 /** anon-aadhaar public TEST key hash. Proofs under it say nothing about a real person. */
-export const TEST_PUBKEY_HASH =
-  15134874015316324267425466444584014077184337590635665158241104437045239495873n;
+export const TEST_PUBKEY_HASH = 15134874015316324267425466444584014077184337590635665158241104437045239495873n;
 /** UIDAI production offline-KYC key hash (uidai_offline_publickey_26022021.cer). */
-export const PRODUCTION_PUBKEY_HASH =
-  18063425702624337643644061197836918910810808173893535653269228433734128853484n;
+export const PRODUCTION_PUBKEY_HASH = 18063425702624337643644061197836918910810808173893535653269228433734128853484n;
 
 export const BIND_DOMAIN = keccak256(toHex('humanbehind.bind.v1'));
 export const REVOKE_DOMAIN = keccak256(toHex('humanbehind.revoke.v1'));
@@ -75,7 +73,14 @@ export function computeRevokeSignal(args: {
   return BigInt(
     keccak256(
       encodeAbiParameters(
-        [{ type: 'bytes32' }, { type: 'uint256' }, { type: 'address' }, { type: 'address' }, { type: 'uint256' }, { type: 'uint256' }],
+        [
+          { type: 'bytes32' },
+          { type: 'uint256' },
+          { type: 'address' },
+          { type: 'address' },
+          { type: 'uint256' },
+          { type: 'uint256' },
+        ],
         [REVOKE_DOMAIN, BigInt(args.chainId), args.registry, args.identityRegistry, args.agentId, args.nonce],
       ),
     ),
@@ -100,7 +105,9 @@ export type BindingProof = {
 };
 
 /** JSON-safe form for transport (bigints as decimal strings). */
-export type BindingProofJson = { [K in keyof BindingProof]: K extends 'packed' ? string[] : K extends 'provingMs' ? number : string };
+export type BindingProofJson = {
+  [K in keyof BindingProof]: K extends 'packed' ? string[] : K extends 'provingMs' ? number : string;
+};
 
 export function proofToJson(p: BindingProof): BindingProofJson {
   return {

@@ -20,7 +20,16 @@ const nextConfig = {
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // snarkjs/ffjavascript reference node builtins behind runtime checks.
-      config.resolve.fallback = { ...config.resolve.fallback, fs: false, path: false, crypto: false, os: false, readline: false, constants: false, worker_threads: false };
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        path: false,
+        crypto: false,
+        os: false,
+        readline: false,
+        constants: false,
+        worker_threads: false,
+      };
     }
     return config;
   },

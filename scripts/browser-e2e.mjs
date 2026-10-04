@@ -33,7 +33,9 @@ try {
   await page.getByRole('button', { name: 'Generate proof' }).click();
   const tp = Date.now();
   await page.getByText(/proved in/).waitFor({ timeout: 15 * 60 * 1000 });
-  log(`PROOF DONE in browser: ${await page.getByText(/proved in/).innerText()} (wall ${((Date.now() - tp) / 1000).toFixed(1)}s)`);
+  log(
+    `PROOF DONE in browser: ${await page.getByText(/proved in/).innerText()} (wall ${((Date.now() - tp) / 1000).toFixed(1)}s)`,
+  );
   await page.getByRole('button', { name: 'Bind agent to human' }).click();
   await page.getByText(/^Bound\./).waitFor({ timeout: 60000 });
   log('bound on-chain');
@@ -49,6 +51,11 @@ try {
   await page.screenshot({ path: `${OUT}/fail.png`, fullPage: true });
   process.exitCode = 1;
 } finally {
-  console.log(logs.filter((l) => /error|warn/i.test(l)).slice(0, 20).join('\n'));
+  console.log(
+    logs
+      .filter((l) => /error|warn/i.test(l))
+      .slice(0, 20)
+      .join('\n'),
+  );
   await browser.close();
 }

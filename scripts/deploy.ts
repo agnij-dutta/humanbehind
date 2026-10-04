@@ -39,11 +39,22 @@ export async function deployLocal(rpcUrl = 'http://127.0.0.1:8545', maxAgentsPer
   const anonAadhaar = await deploy(art.abis.AnonAadhaar, art.bytecode.AnonAadhaar, [groth16Verifier, TEST_PUBKEY_HASH]);
   const identityRegistry = await deploy(agentIdentityRegistryAbi as Abi, art.bytecode.AgentIdentityRegistry);
   const bindingRegistry = await deploy(humanBindingRegistryAbi as Abi, art.bytecode.HumanBindingRegistry, [
-    anonAadhaar, identityRegistry, NULLIFIER_SEED, true, maxAgentsPerHuman, 86400n,
+    anonAadhaar,
+    identityRegistry,
+    NULLIFIER_SEED,
+    true,
+    maxAgentsPerHuman,
+    86400n,
   ]);
   return {
-    chainId: foundry.id, rpcUrl, anonAadhaar, groth16Verifier, identityRegistry, bindingRegistry,
-    nullifierSeed: NULLIFIER_SEED.toString(), testAnchor: true,
+    chainId: foundry.id,
+    rpcUrl,
+    anonAadhaar,
+    groth16Verifier,
+    identityRegistry,
+    bindingRegistry,
+    nullifierSeed: NULLIFIER_SEED.toString(),
+    testAnchor: true,
   };
 }
 

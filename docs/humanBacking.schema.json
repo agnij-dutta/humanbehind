@@ -17,7 +17,10 @@
       },
       "agentId": {
         "description": "The ERC-8004 agentId in the identity registry named in `registrations`.",
-        "oneOf": [{ "type": "integer", "minimum": 1 }, { "type": "string", "pattern": "^[0-9]+$" }]
+        "oneOf": [
+          { "type": "integer", "minimum": 1 },
+          { "type": "string", "pattern": "^[0-9]+$" }
+        ]
       },
       "claims": {
         "type": "array",

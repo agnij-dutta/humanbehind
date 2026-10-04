@@ -62,9 +62,7 @@ export default async function AgentPage({ params }: { params: { id: string } }) 
         <dt>Human id (per-app)</dt>
         <dd className="mono">{live ? `${backing.nullifier.toString().slice(0, 18)}…` : 'n/a'}</dd>
         <dt>Agents this human backs</dt>
-        <dd>
-          {live ? `${backing.agentsForHuman} of max ${backing.maxAgentsForHuman}` : 'n/a'}
-        </dd>
+        <dd>{live ? `${backing.agentsForHuman} of max ${backing.maxAgentsForHuman}` : 'n/a'}</dd>
         <dt>Bound at</dt>
         <dd>{fmt(backing.boundAt)}</dd>
         <dt>QR signed at</dt>

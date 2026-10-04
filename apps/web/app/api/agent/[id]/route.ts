@@ -24,7 +24,7 @@ export async function GET(_req: Request, { params }: { params: { id: string } })
         attestation: b,
       }),
     );
-  } catch (e) {
+  } catch {
     return NextResponse.json({ humanBackedStrict: false, error: 'chain read failed' }, { status: 502 });
   }
 }

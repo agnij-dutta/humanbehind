@@ -10,11 +10,24 @@
     "build": "pnpm build:packages && pnpm --filter web build",
     "fixture": "tsx scripts/prove-fixture.ts",
     "e2e": "tsx scripts/e2e-anvil.ts",
-    "dev": "pnpm --filter web dev"
+    "dev": "pnpm --filter web dev",
+    "test:packages": "pnpm --filter @humanbehind/core --filter @humanbehind/verifier test",
+    "test": "pnpm test:packages && pnpm test:contracts",
+    "lint": "eslint . --max-warnings 0",
+    "format": "prettier --write . && cd contracts && forge fmt",
+    "format:check": "prettier --check . && cd contracts && forge fmt --check"
   },
   "devDependencies": {
+    "@eslint/js": "^9",
+    "@next/eslint-plugin-next": "16.3.8",
     "@types/node": "^22.10.0",
+    "eslint": "^9",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.9",
     "tsx": "^4.20.0",
-    "typescript": "~5.9.3"
+    "typescript": "~5.9.3",
+    "typescript-eslint": "^8.71.0"
   }
 }

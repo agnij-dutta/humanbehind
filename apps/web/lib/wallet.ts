@@ -1,5 +1,13 @@
 'use client';
-import { createWalletClient, custom, http, type Address, type WalletClient, BaseError, ContractFunctionRevertedError } from 'viem';
+import {
+  createWalletClient,
+  custom,
+  http,
+  type Address,
+  type WalletClient,
+  BaseError,
+  ContractFunctionRevertedError,
+} from 'viem';
 import { chain, config } from './config';
 
 /** anvil default accounts #1 and #2. anvil signs for them itself (unlocked), so no key ships to the browser. */

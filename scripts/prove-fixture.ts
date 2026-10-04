@@ -29,23 +29,44 @@ async function main() {
   const certificatePem = devFixture('testCertificate.pem');
 
   const bindSignal = computeBindSignal({
-    chainId: CHAIN_ID, registry: REGISTRY, identityRegistry: IDENTITY, agentId: AGENT_ID, owner: OWNER, nonce: 0n,
+    chainId: CHAIN_ID,
+    registry: REGISTRY,
+    identityRegistry: IDENTITY,
+    agentId: AGENT_ID,
+    owner: OWNER,
+    nonce: 0n,
   });
   // After a successful bind the nonce is 1.
   const revokeSignal = computeRevokeSignal({
-    chainId: CHAIN_ID, registry: REGISTRY, identityRegistry: IDENTITY, agentId: AGENT_ID, nonce: 1n,
+    chainId: CHAIN_ID,
+    registry: REGISTRY,
+    identityRegistry: IDENTITY,
+    agentId: AGENT_ID,
+    nonce: 1n,
   });
 
   console.log(`machine: ${os.cpus()[0]?.model} x${os.cpus().length}, node ${process.version}`);
   console.log('proving bind (singleThread)...');
   const bind = await proveBinding({
-    qrData, certificatePem, nullifierSeed: NULLIFIER_SEED, signal: bindSignal, wasm: WASM, zkey: ZKEY, singleThread: true,
+    qrData,
+    certificatePem,
+    nullifierSeed: NULLIFIER_SEED,
+    signal: bindSignal,
+    wasm: WASM,
+    zkey: ZKEY,
+    singleThread: true,
   });
   console.log(`  bind proof: ${bind.provingMs} ms single-thread`);
 
   console.log('proving revoke (multi-thread)...');
   const revoke = await proveBinding({
-    qrData, certificatePem, nullifierSeed: NULLIFIER_SEED, signal: revokeSignal, wasm: WASM, zkey: ZKEY, singleThread: false,
+    qrData,
+    certificatePem,
+    nullifierSeed: NULLIFIER_SEED,
+    signal: revokeSignal,
+    wasm: WASM,
+    zkey: ZKEY,
+    singleThread: false,
   });
   console.log(`  revoke proof: ${revoke.provingMs} ms multi-thread`);
   if (revoke.nullifier !== bind.nullifier) throw new Error('same QR + same seed must give the same nullifier');
@@ -59,9 +80,17 @@ async function main() {
       freshPhoto: true,
     });
     otherHuman = await proveBinding({
-      qrData: qr2, certificatePem, nullifierSeed: NULLIFIER_SEED, signal: bindSignal, wasm: WASM, zkey: ZKEY, singleThread: false,
+      qrData: qr2,
+      certificatePem,
+      nullifierSeed: NULLIFIER_SEED,
+      signal: bindSignal,
+      wasm: WASM,
+      zkey: ZKEY,
+      singleThread: false,
     });
-    console.log(`  second human: ${otherHuman.provingMs} ms multi-thread, nullifier differs: ${otherHuman.nullifier !== bind.nullifier}`);
+    console.log(
+      `  second human: ${otherHuman.provingMs} ms multi-thread, nullifier differs: ${otherHuman.nullifier !== bind.nullifier}`,
+    );
   }
 
   const dir = path.join(ROOT, 'contracts/test/fixtures');

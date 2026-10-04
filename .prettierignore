@@ -1,0 +1,10 @@
+node_modules
+dist
+.next
+.next-*
+.artifacts
+contracts
+pnpm-lock.yaml
+packages/core/src/abi.ts
+apps/web/public/artifacts
+dev-fixtures

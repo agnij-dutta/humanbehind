@@ -58,7 +58,9 @@ contract RealProofTest is Test {
         nullifier = vm.parseUint(json.readString(string.concat(key, ".nullifier")));
         timestamp = vm.parseUint(json.readString(string.concat(key, ".timestamp")));
         string[] memory p = json.readStringArray(string.concat(key, ".packed"));
-        for (uint256 i; i < 8; i++) packed[i] = vm.parseUint(p[i]);
+        for (uint256 i; i < 8; i++) {
+            packed[i] = vm.parseUint(p[i]);
+        }
     }
 
     function test_real_signalMatchesOffchainComputation() public {
