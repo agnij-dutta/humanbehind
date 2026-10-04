@@ -1,0 +1,20 @@
+{
+  "name": "@humanbehind/verifier",
+  "version": "0.1.0",
+  "description": "isHumanBacked(agentId): check that an ERC-8004 agent is bound to a unique, adult human via HumanBindingRegistry.",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "peerDependencies": { "viem": "^2.0.0" },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "~5.9.3",
+    "viem": "^2.57.0"
+  }
+}

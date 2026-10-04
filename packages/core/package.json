@@ -1,0 +1,26 @@
+{
+  "name": "@humanbehind/core",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./prover": { "types": "./dist/prover.d.ts", "default": "./dist/prover.js" },
+    "./testqr": { "types": "./dist/testqr.d.ts", "default": "./dist/testqr.js" }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@anon-aadhaar/core": "2.4.3",
+    "snarkjs": "^0.7.5",
+    "viem": "^2.57.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "typescript": "~5.9.3"
+  }
+}

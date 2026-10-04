@@ -1,0 +1,11 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "lib": ["ES2022", "DOM"],
+    "types": ["node"],
+    "paths": { "@anon-aadhaar/core": ["./src/types/anon-aadhaar-core.d.ts"] }
+  },
+  "include": ["src"]
+}

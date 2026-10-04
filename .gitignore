@@ -1,0 +1,15 @@
+node_modules
+.artifacts
+.next
+.next-*
+dist
+*.tsbuildinfo
+contracts/out
+contracts/cache
+contracts/broadcast
+.env
+.env.local
+deployments/*.local.json
+apps/web/public/artifacts/*.zkey
+apps/web/public/artifacts/*.wasm
+scripts/artifacts.json
