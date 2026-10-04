@@ -6,13 +6,23 @@
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
-    ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-    "./prover": { "types": "./dist/prover.d.ts", "default": "./dist/prover.js" },
-    "./testqr": { "types": "./dist/testqr.d.ts", "default": "./dist/testqr.js" }
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./prover": {
+      "types": "./dist/prover.d.ts",
+      "default": "./dist/prover.js"
+    },
+    "./testqr": {
+      "types": "./dist/testqr.d.ts",
+      "default": "./dist/testqr.js"
+    }
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "typecheck": "tsc -p tsconfig.json --noEmit"
+    "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p test/tsconfig.json",
+    "test": "node --import tsx --test test/*.test.ts"
   },
   "dependencies": {
     "@anon-aadhaar/core": "2.4.3",
